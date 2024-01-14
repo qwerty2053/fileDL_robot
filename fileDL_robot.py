@@ -15,6 +15,7 @@ local_server = TelegramAPIServer.from_base("http://localhost:8081")
 bot = Bot(token=TOKEN, server=local_server)
 dp = Dispatcher(bot)
 
+
 def download_file(url: str):
     filename = url.split("/")[-1]
     with open(filename, 'wb') as f:
@@ -44,11 +45,10 @@ async def get_text(message):
             await bot.send_chat_action(message.chat.id, "upload_document")
             await bot.send_document(message.chat.id, filename)
         except Exception as exc:
-            printl(exc)
+            print(exc)
             await bot.send_message(message.chat.id, f"🚫 An error occured while fetching this file")
     else:
-        await bot.send_message(message.chat.id,
-                               f"🔗 Send me a valid url")
+        await bot.send_message(message.chat.id, f"🔗 Send me a valid url")
 
 
 executor.start_polling(dp, skip_updates=True)
