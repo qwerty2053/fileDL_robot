@@ -23,11 +23,11 @@ def download_file(url: str):
             r.raise_for_status()
             file_size_mb = int(r.headers.get('content-length', 0)) / 1024 / 1024
             if file_size_mb > UPLOAD_FILE_SIZE_LIMIT_MB:
-                raise Exception("Upload file size limit error")
+                raise Exception(f"Upload file size limit error {file_size_mb}")
             print(f"File size {file_size_mb}mb:\n{url}")
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
-            print(f"File downloaded ({file_size}mb):\n{url}")
+            print(f"File downloaded ({file_size_mb}mb):\n{url}")
     return filename
 
 
