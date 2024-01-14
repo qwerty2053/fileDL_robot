@@ -23,12 +23,12 @@ def download_file(url: str):
             r.raise_for_status()
             file_size_mb = int(r.headers.get('content-length', 0)) / 1024 / 1024
             if file_size_mb > UPLOAD_FILE_SIZE_LIMIT_MB:
-                raise Exception(f"Upload file size limit error {file_size_mb}")
+                return filename, False
             print(f"File size {file_size_mb}mb:\n{url}")
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
             print(f"File downloaded ({file_size_mb}mb):\n{url}")
-    return filename
+    return filename, True
 
 
 @dp.message_handler(content_types=["text"])
@@ -41,9 +41,12 @@ async def get_text(message):
 
     elif is_valid_url(message.text):
         try:
-            filename = download_file(message.text)
-            await bot.send_chat_action(message.chat.id, "upload_document")
-            await bot.send_document(message.chat.id, types.InputFile(filename))
+            filename, downloaded = download_file(message.text)
+            if downloaded:
+                await bot.send_chat_action(message.chat.id, "upload_document")
+                await bot.send_document(message.chat.id, types.InputFile(filename))
+            else:
+                await bot.send_message(message.chat.id, f"🚫 File is too large (2 Gb is maximum)")
             os.remove(filename)
         except Exception as exc:
             print(exc)
