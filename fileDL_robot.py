@@ -3,7 +3,7 @@ from aiogram.bot.api import TelegramAPIServer
 from validators import url as is_valid_url
 import requests
 
-from urllib.parse import urlparse
+import os
 
 
 TOKEN = "6878787981:AAE5Bl6VUaV_qOO-EY-0vKo5l6rpzXdRrK8"
@@ -43,7 +43,8 @@ async def get_text(message):
         try:
             filename = download_file(message.text)
             await bot.send_chat_action(message.chat.id, "upload_document")
-            await bot.send_document(message.chat.id, filename)
+            await bot.send_document(message.chat.id, types.InputFile(filename))
+            os.remove(filename)
         except Exception as exc:
             print(exc)
             await bot.send_message(message.chat.id, f"🚫 An error occured while fetching this file")
