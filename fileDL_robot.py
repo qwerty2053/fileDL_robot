@@ -18,10 +18,13 @@ dp = Dispatcher(bot)
 
 def download_file(url: str):
     filename = url.split("/")[-1]
+    if len(filename) > 60:
+        filename = filename[-60:]
     with open(filename, 'wb') as f:
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
             file_size_mb = int(r.headers.get('content-length', 0)) / 1024 / 1024
+            print(r.headers)
             if file_size_mb > UPLOAD_FILE_SIZE_LIMIT_MB:
                 return filename, False
             print(f"File size {file_size_mb}mb:\n{url}")
