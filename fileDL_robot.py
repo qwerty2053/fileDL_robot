@@ -18,11 +18,13 @@ dp = Dispatcher(bot)
 
 
 def make_correct_filename(filename):
-    if sys.getsizeof(filename) <= 255:
+    if filename.startswith("attachment; filename="):
+        filename = filename[22:-1]
+    if sys.getsizeof(filename) <= 255 and len(filename) <= 60:
         return filename
     i = len(filename) - 1
     new_filename = ""
-    while i > 0 and sys.getsizeof(new_filename + filename[i]) < 255:
+    while i > 0 and sys.getsizeof(new_filename + filename[i]) < 255 and len(new_filename) < 59:
         i -= 1
         new_filename += filename[i]
     return new_filename
@@ -31,7 +33,7 @@ def make_correct_filename(filename):
 def download_file(url: str):
     with requests.get(url, stream=True, allow_redirects=True) as r:
         r.raise_for_status()
-        filename = make_correct_filename(r.headers.get("filename", url.split("/")[-1]))
+        filename = make_correct_filename(r.headers.get("Content-Disposition", url.split("/")[-1]))
         with open(filename, 'wb') as f:
             file_size_mb = int(r.headers.get('content-length', 0)) / 1024 / 1024
             if file_size_mb > UPLOAD_FILE_SIZE_LIMIT_MB:
