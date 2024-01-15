@@ -3,6 +3,7 @@ from aiogram.bot.api import TelegramAPIServer
 from validators import url as is_valid_url
 import requests
 
+import sys
 import os
 
 
@@ -16,21 +17,29 @@ bot = Bot(token=TOKEN, server=local_server)
 dp = Dispatcher(bot)
 
 
+def make_correct_filename(filename):
+    if sys.getsizeof(filename) <= 255:
+        return filename
+    i = len(filename) - 1
+    new_filename = ""
+    while i > 0 and sys.getsizeof(new_filename + filename[i]) < 255:
+        i -= 1
+        new_filename += filename[i]
+    return new_filename
+
+
 def download_file(url: str):
-    filename = url.split("/")[-1]
-    if len(filename) > 60:
-        filename = filename[-60:]
-    with open(filename, 'wb') as f:
-        with requests.get(url, stream=True) as r:
-            r.raise_for_status()
+    with requests.get(url, stream=True, allow_redirects=True) as r:
+        r.raise_for_status()
+        filename = make_correct_filename(r.headers.get("filename", url.split("/")[-1]))
+        with open(filename, 'wb') as f:
             file_size_mb = int(r.headers.get('content-length', 0)) / 1024 / 1024
-            print(r.headers)
             if file_size_mb > UPLOAD_FILE_SIZE_LIMIT_MB:
                 return filename, False
             print(f"File size {file_size_mb}mb:\n{url}")
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
-            print(f"File downloaded ({file_size_mb}mb):\n{url}")
+            print(f"File saved as {filename} ({file_size_mb}mb)")
     return filename, True
 
 
