@@ -25,9 +25,9 @@ def make_correct_filename(filename):
     i = len(filename) - 1
     new_filename = ""
     while i > 0 and sys.getsizeof(new_filename + filename[i]) < 255 and len(new_filename) < 59:
-        i -= 1
         new_filename += filename[i]
-    return new_filename
+        i -= 1
+    return new_filename[::-1]
 
 
 def download_file(url: str):
