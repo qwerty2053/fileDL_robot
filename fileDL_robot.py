@@ -51,7 +51,7 @@ def split_file(filename: str):
     os.makedirs(parts_dir, exist_ok=True)
     os.system(f"split -b {CHUNK_SIZE_MB}MB {filename} {parts_dir}/")
     print(f"Splitted {filename}")
-    return os.listdir(parts_dir), parts_dir
+    return [f"{parts_dir}/{p}" for p in os.listdir(parts_dir)]
 
 
 @dp.message_handler(content_types=["text"])
@@ -70,11 +70,11 @@ async def get_text(message):
                 if file_size_mb <= CHUNK_SIZE_MB:
                     await bot.send_document(message.chat.id, types.InputFile(filename))
                 else:
-                    splitted_files, parts_dir = split_file(filename)
+                    splitted_files = split_file(filename)
                     await bot.send_message(message.chat.id, f"Sending {len(splitted_files)} splitted files")
                     for part_filename in splitted_files:
                         bot.send_document(message.chat.id, types.InputFile(part_filename))
-                    os.system(f"rm -rf {parts_dir}")
+                    os.system(f"rm -rf {splitted_files[0].split('/')[0]}")
             else:
                 await bot.send_message(message.chat.id, f"🚫 File is too large (4 Gb is maximum)")
             os.remove(filename)
