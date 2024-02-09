@@ -49,7 +49,7 @@ def split_file(filename: str):
     print(f"Splitting {filename}")
     parts_dir = "".join([ch if ch.isalnum() else "_" for ch in filename])
     os.makedirs(parts_dir, exist_ok=True)
-    os.system(f"split -b {CHUNK_SIZE_MB}MB {filename} {parts_dir}/")
+    os.system(f"split -b {CHUNK_SIZE_MB}M {filename} {parts_dir}/")
     print(f"Splitted {filename}")
     return [f"{parts_dir}/{p}" for p in os.listdir(parts_dir)]
 
@@ -71,7 +71,7 @@ async def get_text(message):
                     await bot.send_document(message.chat.id, types.InputFile(filename))
                 else:
                     splitted_files = split_file(filename)
-                    await bot.send_message(message.chat.id, f"Sending {len(splitted_files)} splitted files")
+                    await bot.send_message(message.chat.id, f"Sending {len(splitted_files)} splitted files\nOriginal file name:\n{filename}")
                     for part_filename in splitted_files:
                         await bot.send_document(message.chat.id, types.InputFile(part_filename))
                     os.system(f"rm -rf {splitted_files[0].split('/')[0]}")
