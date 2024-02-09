@@ -8,8 +8,8 @@ import os
 
 
 TOKEN = "6878787981:AAE5Bl6VUaV_qOO-EY-0vKo5l6rpzXdRrK8"
-UPLOAD_FILE_SIZE_LIMIT_MB = 2000
-
+UPLOAD_FILE_SIZE_LIMIT_MB = 4000
+CHUNK_SIZE_MB = 20
 
 local_server = TelegramAPIServer.from_base("http://localhost:8081")
 
@@ -37,12 +37,21 @@ def download_file(url: str):
         with open(filename, 'wb') as f:
             file_size_mb = int(r.headers.get('content-length', 0)) / 1024 / 1024
             if file_size_mb > UPLOAD_FILE_SIZE_LIMIT_MB:
-                return filename, False
+                return filename, 0
             print(f"File size {file_size_mb}mb:\n{url}")
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
             print(f"File saved as {filename} ({file_size_mb}mb)")
-    return filename, True
+    return filename, file_size_mb
+
+
+def split_file(filename: str) -> list[str]:
+    print(f"Splitting {filename}")
+    os.system(f"split -b {CHUNK_SIZE_MB}MB {filename}")
+    print(f"Splitted {filename}")
+    filenames = os.listdir()
+    filenames.remove(filename)
+    return filenames
 
 
 @dp.message_handler(content_types=["text"])
@@ -55,12 +64,18 @@ async def get_text(message):
 
     elif is_valid_url(message.text):
         try:
-            filename, downloaded = download_file(message.text)
-            if downloaded:
+            filename, file_size_mb = download_file(message.text)
+            if file_size_mb:
                 await bot.send_chat_action(message.chat.id, "upload_document")
-                await bot.send_document(message.chat.id, types.InputFile(filename))
+                if file_size_mb <= CHUNK_SIZE_MB:
+                    await bot.send_document(message.chat.id, types.InputFile(filename))
+                else:
+                    splitted_files = split_file(filename)
+                    await bot.send_message(message.chat.id, f"Sending {len(splitted_files)} splitted files")
+                    for part_filename in splitted_files:
+                        bot.send_document(message.chat.id, types.InputFile(part_filename))
             else:
-                await bot.send_message(message.chat.id, f"🚫 File is too large (2 Gb is maximum)")
+                await bot.send_message(message.chat.id, f"🚫 File is too large (4 Gb is maximum)")
             os.remove(filename)
         except Exception as exc:
             print(exc)
