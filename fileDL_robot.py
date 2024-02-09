@@ -8,8 +8,8 @@ import os
 
 
 TOKEN = "6878787981:AAE5Bl6VUaV_qOO-EY-0vKo5l6rpzXdRrK8"
-UPLOAD_FILE_SIZE_LIMIT_MB = 4000
-CHUNK_SIZE_MB = 20
+UPLOAD_FILE_SIZE_LIMIT_MB = 4500
+CHUNK_SIZE_MB = 2000
 
 local_server = TelegramAPIServer.from_base("http://localhost:8081")
 
@@ -76,7 +76,7 @@ async def get_text(message):
                         await bot.send_document(message.chat.id, types.InputFile(part_filename))
                     os.system(f"rm -rf {splitted_files[0].split('/')[0]}")
             else:
-                await bot.send_message(message.chat.id, f"🚫 File is too large (4 Gb is maximum)")
+                await bot.send_message(message.chat.id, f"🚫 File is too large ({UPLOAD_FILE_SIZE_LIMIT_MB} MB is maximum)")
             os.remove(filename)
         except Exception as exc:
             print(exc)
