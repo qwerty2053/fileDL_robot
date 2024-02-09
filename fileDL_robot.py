@@ -47,7 +47,10 @@ def download_file(url: str):
 
 def split_file(filename: str) -> list[str]:
     print(f"Splitting {filename}")
-    os.system(f"split -b {CHUNK_SIZE_MB}MB {filename}")
+    parts_dir = "".join([ch if ch.isalnum() else "_" for ch in filename])
+    os.makedirs(parts_dir, exist_ok=True)
+    os.replace(filename, parts_dir)
+    os.system(f"split -b {CHUNK_SIZE_MB}MB {parts_dir}/{filename} {parts_dir}/")
     print(f"Splitted {filename}")
     filenames = os.listdir()
     filenames.remove(filename)
