@@ -51,9 +51,7 @@ def split_file(filename: str):
     os.makedirs(parts_dir, exist_ok=True)
     os.system(f"split -b {CHUNK_SIZE_MB}MB {filename} {parts_dir}/")
     print(f"Splitted {filename}")
-    filenames = os.listdir()
-    filenames.remove(filename)
-    return filenames, parts_dir
+    return os.listdir(parts_dir), parts_dir
 
 
 @dp.message_handler(content_types=["text"])
