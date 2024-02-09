@@ -49,7 +49,7 @@ def split_file(filename: str):
     print(f"Splitting {filename}")
     parts_dir = "".join([ch if ch.isalnum() else "_" for ch in filename])
     os.makedirs(parts_dir, exist_ok=True)
-    os.system(f"split -b {CHUNK_SIZE_MB}M {filename} {parts_dir}/")
+    os.system(f"split -b {CHUNK_SIZE_MB}M \"{filename}\" {parts_dir}/")
     print(f"Splitted {filename}")
     return [f"{parts_dir}/{p}" for p in os.listdir(parts_dir)]
 
