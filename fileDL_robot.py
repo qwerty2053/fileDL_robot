@@ -73,7 +73,7 @@ async def get_text(message):
                     splitted_files = split_file(filename)
                     await bot.send_message(message.chat.id, f"Sending {len(splitted_files)} splitted files")
                     for part_filename in splitted_files:
-                        bot.send_document(message.chat.id, types.InputFile(part_filename))
+                        await bot.send_document(message.chat.id, types.InputFile(part_filename))
                     os.system(f"rm -rf {splitted_files[0].split('/')[0]}")
             else:
                 await bot.send_message(message.chat.id, f"🚫 File is too large (4 Gb is maximum)")
