@@ -33,7 +33,7 @@ To use this bot, you must set up your own local Telegram Bot API server. Follow 
 2. Install dependencies:
 
    ```bash
-   pip install requests aiogram validators
+   pip install -r requirements.txt
    ```
 
 3. Set up and run the Telegram Bot API server:
